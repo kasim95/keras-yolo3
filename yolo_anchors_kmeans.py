@@ -1,11 +1,20 @@
-import numpy as np
+"""
+Usage:  
+    python yolo_anchors_kmeans.py 
+    --train_path data/train.txt 
+    --anchor_path data/yolo_anchors.txt  
+    --no_anchors 6 
+"""
 
+import numpy as np
+import argparse
 
 class YOLO_Kmeans:
 
-    def __init__(self, cluster_number, filename):
+    def __init__(self, cluster_number, filename, anchor_path):
         self.cluster_number = cluster_number
-        self.filename = "2012_train.txt"
+        self.filename = filename
+        self.anchor_path = anchor_path
 
     def iou(self, boxes, clusters):  # 1 box -> k clusters
         n = boxes.shape[0]
@@ -58,7 +67,7 @@ class YOLO_Kmeans:
         return clusters
 
     def result2txt(self, data):
-        f = open("yolo_anchors.txt", 'w')
+        f = open(self.anchor_path, 'w')
         row = np.shape(data)[0]
         for i in range(row):
             if i == 0:
@@ -95,7 +104,13 @@ class YOLO_Kmeans:
 
 
 if __name__ == "__main__":
-    cluster_number = 9
-    filename = "2012_train.txt"
-    kmeans = YOLO_Kmeans(cluster_number, filename)
+    
+    # get cli args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train_path', help='Path for train annotations .txt file')
+    parser.add_argument('--anchor_path', help='Path to store anchors .txt file')
+    parser.add_argument('--no_anchors', type=int, help='Number of anchors to calculate', default=9)
+    args = parser.parse_args()
+
+    kmeans = YOLO_Kmeans(args.no_anchors, args.train_path, args.anchor_path)
     kmeans.txt2clusters()
